@@ -9,7 +9,7 @@ import {
 import CustomerProfileSettings from "@/components/customer/customer_profile_settings"
 import PaymentMethodsSettings from "@/components/customer/payment_methods_settings"
 import VendorProfileSettings from "@/components/vendor/Vender_profile_settings"
-
+import { useRouter } from 'next/navigation';
 import { notificationService } from "@/service/NotificationService";
 
 const settingsTabs = [
@@ -21,6 +21,7 @@ const settingsTabs = [
 ];
 
 export default function SettingsPage() {
+  const router = useRouter();
   const [activeTab, setActiveTab] = useState("customer");
   const [isEditing, setIsEditing] = useState(false);
 
@@ -29,10 +30,10 @@ export default function SettingsPage() {
 
   const renderHelpCenter = () => (
     <div className="space-y-6 animate-fadeIn">
-      <div>
+      {/* <div>
         <h2 className="text-2xl font-bold text-gray-900 mb-1">Help Center</h2>
         <p className="text-gray-500">Get assistance and find answers to your questions</p>
-      </div>
+      </div> */}
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {[
@@ -158,10 +159,10 @@ export default function SettingsPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-purple-50 p-6">
       <div className="max-w-7xl mx-auto">
-        <div className="mb-8">
+        {/* <div className="mb-8">
           <h1 className="text-4xl font-bold text-gray-900 mb-2">Settings</h1>
           <p className="text-gray-600">Manage your account and preferences</p>
-        </div>
+        </div> */}
 
         <div className="flex flex-col lg:flex-row gap-6">
           {/* Enhanced Tabs */}
@@ -171,16 +172,17 @@ export default function SettingsPage() {
                 const Icon = tab.icon;
                 return (
                   <button
+                  style={{background: "#3730a3"}} 
                     key={tab.id}
                     onClick={() => setActiveTab(tab.id)}
                     className={`w-full flex items-center gap-4 px-5 py-4 rounded-2xl font-semibold text-left transition-all group
                       ${activeTab === tab.id 
-                        ? `bg-gradient-to-r ${tab.gradient} text-white shadow-lg scale-105` 
-                        : "text-gray-700 hover:bg-gray-50"
+                        ? `bg-gradient-to-r  text-white shadow-lg scale-105` 
+                        : " hover:bg-gray-50"
                       }
                     `}
                   >
-                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-transform group-hover:scale-110
+                    <div style={{background: "black"}}  className={`w-10 h-10 rounded-xl flex items-center justify-center transition-transform group-hover:scale-110
                       ${activeTab === tab.id 
                         ? 'bg-white bg-opacity-20' 
                         : `bg-gradient-to-br ${tab.gradient} bg-opacity-10`

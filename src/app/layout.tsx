@@ -5,6 +5,8 @@ import Header from "@/components/shared/header";
 import Footer from "@/components/shared/footer";
 import GlobalNotifier from "@/components/shared/Notifier";
 import { AuthProvider } from "@/context/AuthContext";
+import ErrorBoundary from "@/components/shared/ErrorBoundary";
+import { UserProfileProvider } from "@/context/UserProfileContext";
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -30,15 +32,23 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
+        <ErrorBoundary>
+
+        
          <AuthProvider>
+            <UserProfileProvider>
+
+            
 
         
               <Header />
         
         {children}
+        </UserProfileProvider>
            <Footer />
             <GlobalNotifier />
              </AuthProvider>
+             </ErrorBoundary>
       </body>
     </html>
   );

@@ -1,91 +1,89 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, use } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
-import { Menu, X, User, ChevronDown, LogOut, Settings, Home, Briefcase, Info } from "lucide-react";
+import { Menu, X, Settings, LogOut, Home, Briefcase, Info } from "lucide-react";
 import AccountMenu from "@/components/shared/menueBar";
-import { header } from "framer-motion/client";
 import { useAuth } from "@/context/AuthContext";
+import {userSwitch} from "@/hooks/userSwitch"
+import { useUserProfiles } from "@/context/UserProfileContext";
 export default function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const { user, setUser, isLoggedIn } = useAuth();
   const [isLoading, setIsLoading] = useState(true);
-  
   const [scrolled, setScrolled] = useState(false);
   const pathname = usePathname();
   const router = useRouter();
+  const { reloadProfiles, activeImage } = useUserProfiles();
 
-  // Function to check authentication status
-  const checkAuthStatus = () => {
-    const token = localStorage.getItem("token");
-    console.log("Checking token in header:", token);
-    setIsLoggedIn(!!token);
-    setIsLoading(false);
-  };
-
-  // Check token on component mount and when pathname changes
   useEffect(() => {
-    checkAuthStatus();
-  }, [pathname]);
+  if (user?.id) {
+    reloadProfiles();
+    
+  }
+}, [user]);
 
-  // Listen for storage changes (when user logs in/out in another tab)
+
+useEffect(() => {
+
+   console.log("active}++++==",activeImage)
+    
+
+}, [activeImage]);
+
+
+ 
+
+  // Initialize user from localStorage on mount
+  useEffect(() => {
+    const storedUser = localStorage.getItem("user");
+    if (storedUser) {
+      setUser(JSON.parse(storedUser));
+    }
+    setIsLoading(false);
+  }, [setUser]);
+
+  // Listen for storage changes (login/logout in other tabs)
   useEffect(() => {
     const handleStorageChange = (e: StorageEvent) => {
-      if (e.key === "token") {
-        checkAuthStatus();
+      if (e.key === "user") {
+        const updatedUser = e.newValue ? JSON.parse(e.newValue) : null;
+        setUser(updatedUser);
+      }
+      if (e.key === "token" && !e.newValue) {
+        setUser(null);
       }
     };
-
     window.addEventListener("storage", handleStorageChange);
     return () => window.removeEventListener("storage", handleStorageChange);
-  }, []);
+  }, [setUser]);
 
   // Custom event listener for login/logout within the same window
   useEffect(() => {
     const handleAuthChange = () => {
-      checkAuthStatus();
+      const storedUser = localStorage.getItem("user");
+      setUser(storedUser ? JSON.parse(storedUser) : null);
     };
-
     window.addEventListener("authStateChanged", handleAuthChange);
-    return () => window.removeEventListener("authStateChanged", handleAuthChange);
-  }, []);
+    return () =>
+      window.removeEventListener("authStateChanged", handleAuthChange);
+  }, [setUser]);
 
   // Handle scroll effect
   useEffect(() => {
-    const handleScroll = () => {
-      setScrolled(window.scrollY > 20);
-    };
+    const handleScroll = () => setScrolled(window.scrollY > 20);
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  
-
-
   const handleLogout = () => {
-    console.log("Current pathname:1", pathname);
-  
     localStorage.removeItem("token");
-    localStorage.removeItem("full_name");
-    setIsLoggedIn(false);
-
-   
-    // Dispatch custom event to notify other components
-    window.dispatchEvent(new Event("authStateChanged"));
-  
-     console.log("Logging out useer2");
-     console.log("Current pathname:", pathname);
-      if (pathname === "/") {
-        console.log("Refreshing home page after logout");
-      router.refresh();
-    } else {
-      setIsLoading(true);
-      router.push("/");
-      
-    }
-
+    localStorage.removeItem("user");
+    setUser(null);
+    setMenuOpen(false);
+    if (pathname !== "/") router.push("/");
   };
 
   const navLinks = [
@@ -94,25 +92,19 @@ export default function Header() {
     { name: "About Us", href: "/about", icon: Info },
   ];
 
-  // Prevent flash of wrong content
   if (isLoading) {
     return (
-      <header
-        className="bg-gradient-to-r from-teal-500 via-teal-400 to-cyan-500 sticky top-0 z-50"
-        style={{ height: "80px" }}
-      >
-        <div  style={{ maxWidth: "80px" }} className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full">
-          <div  className="flex justify-between items-center h-full">
+      <header className=" sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full">
+          <div className="flex justify-between items-center h-full">
             <Link href="/" className="flex items-center space-x-2">
-              <div className="relative">
-                <Image
-                  src="/logos/Muawza_logo_header.png"
-                  alt="Company Logo"
-                  width={120}
-                  height={120}
-                  priority
-                />
-              </div>
+              <Image
+                src="/logos/Muawza_logo_header.png"
+                alt="Company Logo"
+                width={120}
+                height={120}
+                priority
+              />
             </Link>
             <div className="w-32 h-10 bg-white/20 rounded-xl animate-pulse" />
           </div>
@@ -122,29 +114,22 @@ export default function Header() {
   }
 
   return (
-    <header 
-    
-      className={`sticky  top-0 z-50 transition-all duration-300 ${
-        scrolled
-          ? "bg-white/95 backdrop-blur-lg shadow-lg"
-          : "bg-gradient-to-r from-teal-500 via-teal-400 to-cyan-500"
-      }`}
-      style={{ height: "120px" }}
+    <header
+      style={{ background: "#3730a3", height: "120px" }}
+      className={"sticky top-0 z-50 transition-all duration-300"}
     >
-      <div  style={{ maxWidth: "1900px" }} className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full">
         <div className="flex justify-between items-center h-full">
           {/* Logo */}
-          <Link href="/" className="flex items-center space-x-2 group">
-            <div className="relative">
-              <Image
-                src="/logos/Muawza_logo_header.png"
-                alt="Company Logo"
-                width={120}
-                height={120}
-                priority
-                className="transition-transform duration-300 group-hover:scale-105"
-              />
-            </div>
+          <Link href="/" className="flex items-center space-x-2">
+            <Image
+              src="/logos/Muawza_logo_header.png"
+              alt="Company Logo"
+              width={120}
+              height={120}
+              priority
+              className="transition-transform duration-300 group-hover:scale-105"
+            />
           </Link>
 
           {/* Desktop Navigation */}
@@ -156,17 +141,9 @@ export default function Header() {
                 <Link
                   key={link.name}
                   href={link.href}
-                  style={{fontSize:"20px"}}
-
-                  className={`flex items-center gap-2 px-4 py-2 rounded-xl font-semibold transition-all duration-300 ${
-                    isActive
-                      ? scrolled
-                        ? "bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-md"
-                        : "bg-white/20 text-white backdrop-blur-sm"
-                      : scrolled
-                      ? "text-gray-700 hover:bg-gray-100"
-                      : "text-white/90 hover:bg-white/20 hover:text-white"
-                  }`}
+                  className={
+                    "flex items-center gap-2 px-4 py-2 rounded-xl font-semibold transition-all duration-300 text-white hover:bg-blue hover:text-white"
+                  }
                 >
                   <Icon size={18} />
                   {link.name}
@@ -178,23 +155,13 @@ export default function Header() {
               <div className="flex items-center space-x-3 ml-4">
                 <Link
                   href="/login"
-                       style={{fontSize:"20px"}}
-                  className={`px-5 py-2 rounded-xl font-semibold transition-all duration-300 ${
-                    scrolled
-                      ? "text-gray-700 hover:bg-gray-100"
-                      : "text-white hover:bg-white/20"
-                  }`}
+                  className="px-5 py-2 rounded-xl font-semibold transition-all duration-300 bg-white text-purple-700 hover:bg-gray-100"
                 >
                   Login
                 </Link>
                 <Link
-                     style={{fontSize:"20px"}}
                   href="/signup"
-                  className={`px-6 py-2.5 rounded-xl font-semibold transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105 ${
-                    scrolled
-                      ? "bg-gradient-to-r from-blue-600 to-purple-600 text-white"
-                      : "bg-white text-teal-600 hover:bg-gray-50"
-                  }`}
+                  className="px-6 py-2.5 rounded-xl font-semibold transition-all duration-300 bg-yellow-500 text-white hover:bg-yellow-600"
                 >
                   Sign Up
                 </Link>
@@ -215,7 +182,11 @@ export default function Header() {
                 : "text-white hover:bg-white/20"
             }`}
           >
-            {menuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+            {menuOpen ? (
+              <X className="w-6 h-6" />
+            ) : (
+              <Menu className="w-6 h-6" />
+            )}
           </button>
         </div>
       </div>
@@ -240,7 +211,7 @@ export default function Header() {
                   onClick={() => setMenuOpen(false)}
                   className={`flex items-center gap-3 px-4 py-3 rounded-xl font-semibold transition-all duration-300 ${
                     isActive
-                      ? "bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-md"
+                      ? "bg-purple-700 text-white"
                       : "text-gray-700 hover:bg-gray-100"
                   }`}
                 >
@@ -254,24 +225,21 @@ export default function Header() {
               <div className="pt-3 mt-3 border-t border-gray-200 space-y-2">
                 <Link
                   href="/login"
-                  className="flex items-center justify-center px-4 py-3 rounded-xl font-semibold text-gray-700 hover:bg-gray-100 transition-all duration-300"
+                  className="flex items-center justify-center px-4 py-3 rounded-xl font-semibold bg-white text-purple-700 border border-purple-200 hover:bg-gray-50 transition-all duration-300"
                   onClick={() => setMenuOpen(false)}
                 >
                   Login
                 </Link>
                 <Link
                   href="/signup"
-                  
-                  className="flex items-center justify-center px-4 py-3 rounded-xl font-semibold bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg hover:shadow-xl transition-all duration-300"
+                  className="flex items-center justify-center px-4 py-3 rounded-xl font-semibold bg-yellow-500 text-white hover:bg-yellow-600 transition-all duration-300"
                   onClick={() => setMenuOpen(false)}
-             
                 >
                   Sign Up
                 </Link>
               </div>
             ) : (
               <div className="pt-3 mt-3 border-t border-gray-200 space-y-1">
-               
                 <Link
                   href="/settings"
                   className="flex items-center gap-3 px-4 py-3 rounded-xl font-semibold text-gray-700 hover:bg-gray-100 transition-all duration-300"
@@ -281,10 +249,7 @@ export default function Header() {
                   Settings
                 </Link>
                 <button
-                  onClick={() => {
-                    handleLogout();
-                    setMenuOpen(false);
-                  }}
+                  onClick={handleLogout}
                   className="flex items-center gap-3 w-full px-4 py-3 rounded-xl font-semibold text-red-600 hover:bg-red-50 transition-all duration-300"
                 >
                   <LogOut size={20} />

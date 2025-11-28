@@ -25,12 +25,21 @@ import {
 export default function Footer() {
   const theme = useTheme();
   const currentYear = new Date().getFullYear();
+  const socialLinks = [
+  { icon: Facebook, url: "https://facebook.com" },
+  { icon: Twitter, url: "https://twitter.com" },
+  { icon: Instagram, url: "https://instagram.com" },
+  { icon: LinkedIn, url: "https://linkedin.com" },
+];
+
+
+  
 
   return (
     <Box
       component="footer"
       sx={{
-        background: "linear-gradient(135deg, #1e3a8a 0%, #3730a3 100%)",
+        background: " #3730a3",
         color: "white",
         py: 8,
         mt: "auto",
@@ -58,7 +67,7 @@ export default function Footer() {
                   color: "transparent",
                 }}
               >
-                ServiceHub
+               Muawza
               </Typography>
               <Typography variant="body1" sx={{ mb: 3, color: "grey.300" }}>
                 Connecting professionals with customers seamlessly. Find the best services near you or grow your business with our platform.
@@ -87,28 +96,32 @@ export default function Footer() {
               </Stack>
 
               {/* Social Media */}
-              <Box sx={{ display: "flex", gap: 1 }}>
-                {[Facebook, Twitter, Instagram, LinkedIn].map((Icon, index) => (
-                  <motion.div
-                    key={index}
-                    whileHover={{ scale: 1.1, y: -2 }}
-                    whileTap={{ scale: 0.95 }}
-                  >
-                    <IconButton
-                      sx={{
-                        color: "grey.300",
-                        backgroundColor: "rgba(255,255,255,0.1)",
-                        "&:hover": {
-                          backgroundColor: "primary.main",
-                          color: "white",
-                        },
-                      }}
-                    >
-                      <Icon />
-                    </IconButton>
-                  </motion.div>
-                ))}
-              </Box>
+             <Box sx={{ display: "flex", gap: 1 }}>
+            {socialLinks.map(({ icon: Icon, url }, index) => (
+              <motion.div
+                key={index}
+                whileHover={{ scale: 1.1, y: -2 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                <IconButton
+                  component="a"
+                  href={url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  sx={{
+                    color: "grey.300",
+                    backgroundColor: "rgba(255,255,255,0.1)",
+                    "&:hover": {
+                      backgroundColor: "primary.main",
+                      color: "white",
+                    },
+                  }}
+                >
+                  <Icon />
+                </IconButton>
+              </motion.div>
+            ))}
+          </Box>
             </motion.div>
           </Grid>
 
@@ -259,18 +272,22 @@ export default function Footer() {
             © {currentYear} ServiceHub. All rights reserved.
           </Typography>
           <Box sx={{ display: "flex", gap: 3 }}>
-            {["Privacy Policy", "Terms of Service", "Cookie Policy"].map((item) => (
-              <Link key={item} href="#" style={{ textDecoration: "none" }}>
-                <Typography
-                  variant="body2"
-                  sx={{
-                    color: "grey.400",
-                    "&:hover": { color: "primary.light" },
-                    transition: "color 0.3s ease",
-                  }}
-                >
-                  {item}
-                </Typography>
+            {["privacy-policy", "Term-and-Conditions", "cookie-policy"].map((item) => (
+              <Link
+              key={item}
+              href={`/${item}`}
+              style={{ textDecoration: "none" }}
+              >
+              <Typography
+                variant="body2"
+                sx={{
+                color: "grey.400",
+                "&:hover": { color: "primary.light" },
+                transition: "color 0.3s ease",
+                }}
+              >
+                {item}
+              </Typography>
               </Link>
             ))}
           </Box>

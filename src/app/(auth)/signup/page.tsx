@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 import { useRouter } from "next/navigation";
-
+import { notificationService } from "@/service/NotificationService";
 export default function SignupPage() {
   const [formData, setFormData] = useState({
     full_name: "",
@@ -66,10 +66,12 @@ export default function SignupPage() {
       
       console.log("Success:", response.data);
       if (response.data.status.code === 201){
+        notificationService.notify({ message: "Account Registered Successfully", type:  "success" });
+        
         router.push("/login");
       }
     } catch (error: any) {
-      setError(error.response?.data?.status?.message || "Signup failed. Please try again.");
+      setError(error.response?.data?.errors[0] || "Signup failed. Please try again.");
       console.error("Signup error:", error);
     } finally {
       setLoading(false);
@@ -84,18 +86,19 @@ export default function SignupPage() {
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 py-8 px-4 sm:px-6 lg:px-8">
       <div className="w-full max-w-md">
         {/* Header */}
-        <div className="text-center mb-8">
+       
+
+        {/* Signup Card */}
+        <div className="bg-white rounded-2xl shadow-xl p-8 border border-gray-100">
+           <div className="text-center mb-8">
           <div className="mx-auto h-12 w-12 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-full flex items-center justify-center mb-4">
             <svg className="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
             </svg>
           </div>
-          <h2 className="text-3xl font-bold text-gray-900 mb-2">Create your account</h2>
+          <h2 className="text-3xl  font-bold text-gray-900 mb-2">Create your account</h2>
           <p className="text-gray-600">Join us today and get started</p>
         </div>
-
-        {/* Signup Card */}
-        <div className="bg-white rounded-2xl shadow-xl p-8 border border-gray-100">
           <form onSubmit={handleSubmit} className="space-y-5">
             {/* Full Name */}
             <div>
@@ -148,21 +151,32 @@ export default function SignupPage() {
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Phone Number
               </label>
-              <div className="relative">
+                <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                   <svg className="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
                   </svg>
                 </div>
                 <input
                   type="tel"
                   name="phone_number"
                   value={formData.phone_number}
+                  onKeyDown={(e) => {
+                    if (!/[0-9]/.test(e.key) && 
+                        e.key !== "Backspace" && 
+                        e.key !== "Delete" &&
+                        e.key !== "ArrowLeft" &&
+                        e.key !== "ArrowRight") {
+                      e.preventDefault();
+                    }
+                  }}
                   onChange={handleChange}
+                  pattern="[0-9]*"
+                  inputMode="numeric"
                   className="block text-black w-full pl-10 pr-3 py-3 border border-gray-300 rounded-xl placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
                   placeholder="Enter your phone number"
                 />
-              </div>
+                </div>
             </div>
 
             {/* Password */}
@@ -231,7 +245,7 @@ export default function SignupPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-gradient-to-r from-blue-500 to-indigo-600 text-white py-3 px-4 rounded-xl font-medium hover:from-blue-600 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 transform hover:shadow-lg"
+              className="w-full bg-gradient-to-r cursor-pointer  from-blue-500 to-indigo-600 text-white py-3 px-4 rounded-xl font-medium hover:from-blue-600 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 transform hover:shadow-lg"
             >
               {loading ? (
                 <div className="flex items-center justify-center">
@@ -260,7 +274,7 @@ export default function SignupPage() {
             <button
               type="button"
               onClick={handleGoogleSignup}
-              className="w-full flex items-center justify-center gap-3 border border-gray-300 py-3 px-4 rounded-xl font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200"
+              className="w-full flex items-center cursor-pointer justify-center gap-3 border border-gray-300 py-3 px-4 rounded-xl font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200"
             >
               <img
                 src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg"

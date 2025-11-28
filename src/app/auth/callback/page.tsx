@@ -13,30 +13,45 @@ import {
   Paper
 } from "@mui/material";
 import { CheckCircle, Error } from "@mui/icons-material";
-
+import { useAuth } from "@/context/AuthContext";
 export default function AuthCallbackPage() {
   const router = useRouter();
   const [status, setStatus] = useState<"loading" | "success" | "error">("loading");
   const [errorMessage, setErrorMessage] = useState("");
-
+  const { setUser } = useAuth();
   useEffect(() => {
+    
     const handleAuth = () => {
       // Get token from URL query string
       const urlParams = new URLSearchParams(window.location.search);
+      const id = urlParams.get("user_id");
+      const rawFullName = urlParams.get("full_name");
+      const email = urlParams.get("email");
+      const role = urlParams.get("role");
+      const full_name = rawFullName ? decodeURIComponent(rawFullName.replace(/\+/g, " ")).trim() : null;
+
       const token = urlParams.get("token");
       const error = urlParams.get("error");
 
       if (token) {
         // Save JWT in localStorage
-        localStorage.setItem("token", token);
+         // Placeholder, replace with actual name if available
+          const user = {
+          id: Number(id ) ,
+          name: full_name || "",
+          email: email || "",
+          role:role ||'"',
+        };
+        setUser(user);
+        localStorage.setItem("user", JSON.stringify(user));
+        localStorage.setItem("token",token)
         setStatus("success");
-        
-        // Redirect after a brief delay to show success state
+
         setTimeout(() => {
           router.replace("/");
         }, 1500);
       } else if (error) {
-        console.error("OAuth Error:", error);
+        console.error("OAuth Error", error);
         setStatus("error");
         setErrorMessage(error);
         

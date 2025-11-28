@@ -1,5 +1,4 @@
-"use client;"
-import React from 'react';
+"use client;";
 import {
   Box,
   Container,
@@ -10,7 +9,6 @@ import {
   AccordionDetails,
   Link,
   Divider,
-  useTheme,
   alpha,
 } from '@mui/material';
 import {
@@ -24,7 +22,9 @@ import {
 } from '@mui/icons-material';
 
 export default function TermsAndConditions() {
-  const theme = useTheme();
+  // Use hard-coded colors instead of useTheme()
+  const primaryMain = '#1976d2'; // MUI default primary
+  const secondaryMain = '#9c27b0'; // MUI default secondary
 
   return (
     <Box
@@ -34,7 +34,7 @@ export default function TermsAndConditions() {
         py: 8,
       }}
     >
-      <Container maxWidth="lg">
+      <Container maxWidth="full" >
         {/* Header */}
         <Paper
           elevation={8}
@@ -42,7 +42,7 @@ export default function TermsAndConditions() {
             p: 6,
             mb: 6,
             textAlign: 'center',
-            background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.secondary.main} 100%)`,
+            background: `black`,
             color: 'white',
             borderRadius: 4,
           }}
@@ -65,14 +65,14 @@ export default function TermsAndConditions() {
             Introduction
           </Typography>
           <Typography variant="body1" paragraph>
-            Welcome to Mahir Company. These terms and conditions outline the rules and regulations 
+            Welcome to Muawza Company. These terms and conditions outline the rules and regulations 
             for the use of our platform. By accessing this website and using our services, you 
             accept these terms and conditions in full.
           </Typography>
           <Typography variant="body1">
             For any confusion or queries, please feel free to contact us at{' '}
-            <Link href="mailto:info@mrmahir.com" color="primary">
-              info@mrmahir.com
+            <Link href="mailto:info@mrMuawza.com" color="primary">
+              info@mrMuawza.com
             </Link>{' '}
             or call us at{' '}
             <Link href="tel:+923096661919" color="primary">
@@ -96,13 +96,13 @@ export default function TermsAndConditions() {
             </AccordionSummary>
             <AccordionDetails>
               <Typography variant="body1" paragraph>
-                <strong>www.mahircompany.com</strong> is an online platform bridging the gap between 
+                <strong>www.Muawzacompany.com</strong> is an online platform bridging the gap between 
                 service users (customers) and service providers (technicians).
               </Typography>
               <Typography variant="body1">
                 In these terms, "Customer" means the customer for whom the works are to be carried out, 
-                and "Mahir Company" means the Company. "Contract" means the agreement between the 
-                Customer and Mahir Company to carry out the works.
+                and "Muawza Company" means the Company. "Contract" means the agreement between the 
+                Customer and Muawza Company to carry out the works.
               </Typography>
             </AccordionDetails>
           </Accordion>
@@ -113,18 +113,18 @@ export default function TermsAndConditions() {
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                 <LocalShipping color="primary" />
                 <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
-                  Scope of Mahir Company Services
+                  Scope of Muawza Company Services
                 </Typography>
               </Box>
             </AccordionSummary>
             <AccordionDetails>
               {[
-                "Company offers the Mahir Company Platform to support technicians in finding work and help customers avail their services.",
+                "Company offers the Muawza Company Platform to support technicians in finding work and help customers avail their services.",
                 "Company assigns verified technicians (according to their availability) for the selected service.",
                 "Customer can change order details or cancel the order if it has not yet been accepted.",
-                "After task assignment, technician details will be shared with the customer through SMS and Mahir Company's platforms.",
+                "After task assignment, technician details will be shared with the customer through SMS and Muawza Company's platforms.",
                 "Payment can be made in cash or through online means (Bank transfer, Easypaisa, JazzCash).",
-                "Technicians will pay agreed-upon service charges to Mahir Company after receiving payment.",
+                "Technicians will pay agreed-upon service charges to Muawza Company after receiving payment.",
                 "Both technician and customer will provide reviews after service completion."
               ].map((item, index) => (
                 <Box key={index} sx={{ display: 'flex', alignItems: 'flex-start', mb: 1 }}>
@@ -175,7 +175,7 @@ export default function TermsAndConditions() {
               </Typography>
               <Typography variant="body1" paragraph>
                 Users can delete their account through the app, email{' '}
-                <Link href="mailto:info@mrmahir.com">info@mrmahir.com</Link>, call{' '}
+                <Link href="mailto:info@mrMuawza.com">info@mrMuawza.com</Link>, call{' '}
                 <Link href="tel:+923096661919">+92 309 6661919</Link>, or use the contact form.
               </Typography>
             </AccordionDetails>
@@ -196,7 +196,7 @@ export default function TermsAndConditions() {
                 "Service Fee is deducted from the agreed fee held in the account",
                 "Increased fees for enhanced tasks are not added to agreed fees",
                 "All charges are non-refundable and non-cancellable",
-                "Mahir Company may restrict accounts until all fees are paid",
+                "Muawza Company may restrict accounts until all fees are paid",
                 "Customers pay service charges online; materials are paid directly to the technician"
               ].map((item, index) => (
                 <Box key={index} sx={{ display: 'flex', alignItems: 'flex-start', mb: 1 }}>
@@ -359,8 +359,8 @@ export default function TermsAndConditions() {
           sx={{
             p: 4,
             mt: 4,
-            textAlign: 'center',
-            background: alpha(theme.palette.primary.main, 0.05),
+            textAlign: 'flex-start',
+            background: alpha(primaryMain, 0.05),
             borderRadius: 3,
           }}
         >
@@ -370,9 +370,9 @@ export default function TermsAndConditions() {
           <Typography variant="body1" paragraph>
             If you have any questions about these Terms & Conditions, please contact us:
           </Typography>
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, alignItems: 'center' }}>
-            <Link href="mailto:info@mrmahir.com" variant="h6" color="primary">
-              info@mrmahir.com
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, alignItems: 'start' }}>
+            <Link href="mailto:info@mrMuawza.com" variant="h6" color="primary">
+              info@mrMuawza.com
             </Link>
             <Link href="tel:+923096661919" variant="body1" color="primary">
               +92 309 6661919

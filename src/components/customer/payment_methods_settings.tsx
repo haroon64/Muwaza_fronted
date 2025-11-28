@@ -12,10 +12,10 @@ import {
 const PaymentMethodsSettings = () => (
     <div className="space-y-6 animate-fadeIn">
       <div className="flex items-center justify-between">
-        <div>
+        {/* <div>
           <h2 className="text-2xl font-bold text-gray-900 mb-1">Payment Methods</h2>
           <p className="text-gray-500">Manage your saved payment methods securely</p>
-        </div>
+        </div> */}
         <button className="bg-gradient-to-r from-green-500 to-emerald-500 text-white px-6 py-3 rounded-full font-semibold hover:shadow-xl transition-all hover:scale-105 flex items-center gap-2">
           <Plus className="w-5 h-5" />
           Add Card

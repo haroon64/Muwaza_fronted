@@ -11,7 +11,7 @@ import {
   Layers,
 } from "lucide-react";
 import { useSearchParams } from "next/navigation";
-import  MapView  from '@/components/service/serviceMapTab';
+import MapView from "@/components/service/serviceMapTab";
 import { notificationService } from "@/service/NotificationService";
 
 interface ServiceAPI {
@@ -24,14 +24,14 @@ interface ServiceAPI {
   cover_image_url: string | null;
   service_name: string;
   address: {
-    city: string;};
+    city: string;
+  };
 }
 
 interface Service {
   id: number;
   service_name: string;
 }
-
 
 export default function ServicesPage() {
   const searchParams = useSearchParams();
@@ -67,7 +67,6 @@ export default function ServicesPage() {
         const data = await res.json();
 
         if (Array.isArray(data)) {
-        
           setServices(data);
         } else if (Array.isArray((data as any).data)) {
           setServices((data as any).data);
@@ -99,10 +98,13 @@ export default function ServicesPage() {
         per_page: perPage.toString(),
       });
 
-      if (priceMin) params.append("price_min", priceMin);
+      priceMin
+        ? params.append("price_min", priceMin)
+        : params.append("price_min", "0");
       if (priceMax) params.append("price_max", priceMax);
       if (city) params.append("city", city);
-      if (searchName.trim()) params.append("sub_service_name", searchName.trim());
+      if (searchName.trim())
+        params.append("sub_service_name", searchName.trim());
       if (selectedService) params.append("service_name", selectedService);
 
       try {
@@ -116,7 +118,7 @@ export default function ServicesPage() {
 
         const data = await res.json();
         if (!res.ok) {
-           notificationService.notify({ message: data.message, type: "error" });
+          notificationService.notify({ message: data.message, type: "error" });
         }
 
         const servicesData = data.sub_services || [];
@@ -126,10 +128,8 @@ export default function ServicesPage() {
 
         setTotalSubService(totalCount);
         setAllServices(servicesData);
-     
+
         setAddress(servicesData?.aadress?.address);
-    
-        
 
         const totalPages = Math.ceil(totalCount / perPage);
         setTotalPages(totalPages > 0 ? totalPages : 1);
@@ -169,11 +169,10 @@ export default function ServicesPage() {
   useEffect(() => {
     // console.log("All Services:", allServices.address.address);
     // setAddress(address);
-
   }, [allServices]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50">
+    <div className=" bg-gradient-to-br from-indigo-50 via-white to-purple-50">
       {/* HERO SECTION */}
       <div className="bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 text-white py-16 px-6">
         <div className="max-w-6xl mx-auto">
@@ -204,7 +203,7 @@ export default function ServicesPage() {
       </div>
 
       {/* MAIN CONTENT */}
-      <div className="max-w-7xl mx-auto px-6 py-10">
+      <div className=" mx-auto px-6 py-10">
         {/* Mobile Filter Toggle */}
         <div className="lg:hidden mb-6">
           <button
@@ -350,7 +349,7 @@ export default function ServicesPage() {
             <div className="flex flex-row mb-6">
               <button
                 onClick={() => setActiveTab("grid")}
-                className={`px-6 py-2 rounded-xl font-semibold ${
+                className={`px-6 py-2   cursor-pointer rounded-xl font-semibold ${
                   activeTab === "grid"
                     ? "bg-indigo-600 text-white"
                     : "bg-gray-100 text-gray-700"
@@ -360,7 +359,7 @@ export default function ServicesPage() {
               </button>
               <button
                 onClick={() => setActiveTab("map")}
-                className={`px-6 py-2 rounded-xl font-semibold ${
+                className={`px-6  cursor-pointer  py-2 rounded-xl font-semibold ${
                   activeTab === "map"
                     ? "bg-indigo-600 text-white"
                     : "bg-gray-100 text-gray-700"
@@ -373,7 +372,10 @@ export default function ServicesPage() {
             {/* LOADING */}
             {loading ? (
               <div className="flex flex-col items-center justify-center py-20">
-                <Loader2 className="animate-spin text-indigo-600 mb-4" size={48} />
+                <Loader2
+                  className="animate-spin text-indigo-600 mb-4"
+                  size={48}
+                />
                 <p className="text-gray-600 text-lg">Loading services...</p>
               </div>
             ) : paginatedServices.length === 0 ? (
@@ -391,7 +393,7 @@ export default function ServicesPage() {
                   </p>
                   <button
                     onClick={handleResetFilters}
-                    className="bg-indigo-600 text-white px-6 py-3 rounded-xl font-semibold"
+                    className="bg-indigo-600  cursor-pointer  text-white px-6 py-3 rounded-xl font-semibold"
                   >
                     Reset Filters
                   </button>
@@ -399,12 +401,12 @@ export default function ServicesPage() {
               </div>
             ) : activeTab === "grid" ? (
               <>
-                <div   style={{minWidth:"1100px",width:"auto"}}  className=" bg-amber-50 max-h-[1200px] overflow-y-auto pr-2">
+                <div className=" bg-amber-50 max-h-[1200px] overflow-y-auto pr-2">
                   <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 pb-4">
                     {paginatedServices.map((service) => (
                       <div
                         key={service.id}
-                       style={{width:"auto"}} 
+                        style={{ width: "auto" }}
                         className="bg-white rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden group"
                       >
                         <ServiceCard
@@ -474,9 +476,11 @@ export default function ServicesPage() {
                     </div>
 
                     <button
-                      onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                      onClick={() =>
+                        setPage((p) => Math.min(totalPages, p + 1))
+                      }
                       disabled={page === totalPages}
-                      className="px-6 py-3 bg-indigo-600 text-white rounded-xl disabled:bg-gray-300"
+                      className="px-6 py-3 bg-indigo-600  cursor-pointer   text-white rounded-xl disabled:bg-gray-300"
                     >
                       Next
                     </button>
@@ -484,12 +488,12 @@ export default function ServicesPage() {
                 )}
               </>
             ) : (
-              <MapView  priceMin={priceMin}
-                        priceMax={priceMax}
-                        city={city} 
-                        searchName={searchName}
-                        selectedService={selectedService}
-                        
+              <MapView
+                priceMin={priceMin}
+                priceMax={priceMax}
+                city={city}
+                searchName={searchName}
+                selectedService={selectedService}
               />
             )}
           </div>

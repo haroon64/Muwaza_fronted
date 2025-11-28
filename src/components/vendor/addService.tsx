@@ -7,6 +7,7 @@ import {
   Percent,
   CheckCircle,
   XCircle,
+  AlertCircle,
   Image as ImageIcon,
   MapPin,
   Search,
@@ -62,23 +63,28 @@ interface ServiceFormProps {
   user_id?: number;
 }
 
+interface FormErrors {
+  sub_service_name?: string;
+  service_id?: string;
+  description?: string;
+  address?: string;
+  cover_image?: string;
+  price?: string;
+  price_bargain?: string;
+  city?: string;
+}
+
 function ServiceForm({ user_id }: ServiceFormProps) {
   const [formData, setFormData] = useState<FormDataType>(initialFormState);
   const [services, setServices] = useState<Services[]>([]);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [userId, setUserId] = useState<number | undefined>(undefined);
   const [submissionStatus, setSubmissionStatus] = useState<SubmissionStatus>(null);
-  
+  const [errors, setErrors] = useState<FormErrors>({});
   // Address search states
-  const [addressQuery, setAddressQuery] = useState<string>("");
   const [suggestions, setSuggestions] = useState<LocationSuggestion[]>([]);
   const [isSearching, setIsSearching] = useState<boolean>(false);
   const [showSuggestions, setShowSuggestions] = useState<boolean>(false);
-
-  // LocationIQ API Key
-  const LOCATIONIQ_API_KEY = "pk.your_locationiq_api_key_here";
-
-  console.log("user_id prop:", user_id);
 
   useEffect(() => {
     if (user_id) {
@@ -106,54 +112,54 @@ function ServiceForm({ user_id }: ServiceFormProps) {
   }, []);
 
   // Search for address using LocationIQ
-  const searchAddress = async (query: string) => {
-    if (!query.trim() || query.length < 3) {
+  const searchAddress = async (e: ChangeEvent<HTMLInputElement>) => {
+    const query = e.target.value;
+    setFormData(prev => ({ 
+      ...prev, 
+      address: query,
+      latitude: "",
+      longitude: ""
+    }));
+    setErrors(prev => ({ ...prev, address: undefined }));
+
+    if (!query.trim()) {
       setSuggestions([]);
+      setShowSuggestions(false);
       return;
     }
 
     setIsSearching(true);
+    setShowSuggestions(true);
+
     try {
-      const response = await fetch(
-        `https://api.locationiq.com/v1/autocomplete?key=${process.env.NEXT_PUBLIC_LOCATIONIQ_KEY}&q=${query}`
+      const res = await fetch(
+        `https://api.locationiq.com/v1/autocomplete?key=${process.env.NEXT_PUBLIC_LOCATIONIQ_KEY}&q=${query}&limit=5`
       );
 
-      if (response.ok) {
-        const data = await response.json();
+      const data = await res.json();
+      if (Array.isArray(data)) {
         setSuggestions(data);
-        setShowSuggestions(true);
+      } else {
+        setSuggestions([]);
       }
     } catch (error) {
-      console.error("Error searching address:", error);
+      console.error("LocationIQ Error:", error);
+      setSuggestions([]);
     } finally {
       setIsSearching(false);
     }
   };
 
-  // Handle address input change with debounce
-  useEffect(() => {
-    const delayDebounceFn = setTimeout(() => {
-      if (addressQuery) {
-        searchAddress(addressQuery);
-      } else {
-        setSuggestions([]);
-      }
-    }, 500);
-
-    return () => clearTimeout(delayDebounceFn);
-  }, [addressQuery]);
-
-  // Handle address selection
-  const handleSelectAddress = (suggestion: LocationSuggestion) => {
-    setFormData((prev) => ({
+  const selectAddress = (item: LocationSuggestion) => {
+    setFormData(prev => ({
       ...prev,
-      address: suggestion.display_name,
-      latitude: suggestion.lat,
-      longitude: suggestion.lon,
+      address: item.display_name,
+      latitude: item.lat,
+      longitude: item.lon,
     }));
-    setAddressQuery(suggestion.display_name);
-    setShowSuggestions(false);
     setSuggestions([]);
+    setShowSuggestions(false);
+    setErrors(prev => ({ ...prev, address: undefined }));
   };
 
   // Handle text + checkbox inputs
@@ -170,6 +176,11 @@ function ServiceForm({ user_id }: ServiceFormProps) {
       ...prev,
       [name]: newValue,
     }));
+
+    // Clear error when user starts typing
+    if (errors[name as keyof FormErrors]) {
+      setErrors(prev => ({ ...prev, [name]: undefined }));
+    }
   };
 
   const handleChangeCity = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -178,6 +189,9 @@ function ServiceForm({ user_id }: ServiceFormProps) {
       ...prev,
       city: e.target.value,
     }));
+    if (errors.city) {
+      setErrors(prev => ({ ...prev, city: undefined }));
+    }
   };
 
   // Handle file upload
@@ -187,19 +201,61 @@ function ServiceForm({ user_id }: ServiceFormProps) {
         ...prev,
         cover_image: e.target.files![0],
       }));
+      if (errors.cover_image) {
+        setErrors(prev => ({ ...prev, cover_image: undefined }));
+      }
     }
   };
 
-  // Validate inputs
-  const validateForm = () => {
-    if (!formData.service_id.trim()) return false;
-    if (!formData.sub_service_name.trim()) return false;
-    if (!formData.description.trim()) return false;
-    if (!formData.price.trim() || Number(formData.price) <= 0) return false;
-    if (!formData.address.trim()) return false;
-    if (!formData.latitude || !formData.longitude) return false;
-    if (!formData.cover_image) return false;
-    return true;
+  const validateForm = (): boolean => {
+    const newErrors: FormErrors = {};
+
+    // Service validation
+    if (!formData.service_id.trim()) {
+      newErrors.service_id = "Please select your Parent Service";
+    }
+    
+    // Sub-service name validation
+    if (!formData.sub_service_name.trim()) {
+      newErrors.sub_service_name = "Sub-Service Name is required";
+    }
+    
+    // Description validation
+    if (!formData.description.trim()) {
+      newErrors.description = "Description is required";
+    }
+    
+    // Price validation
+    if (!formData.price.trim()) {
+      newErrors.price = "Price is required";
+    } else if (Number(formData.price) <= 0) {
+      newErrors.price = "Price must be greater than 0";
+    }
+    
+    // Address validation - enhanced
+    if (!formData.address.trim()) {
+      newErrors.address = "Address is required";
+    } else if (!formData.latitude || !formData.longitude) {
+      newErrors.address = "Please select a valid address from the suggestions";
+    }
+    
+    // City validation
+    if (!formData.city.trim()) {
+      newErrors.city = "City is required";
+    }
+    
+    // Cover image validation
+    if (!formData.cover_image) {
+      newErrors.cover_image = "Cover image is required";
+    }
+    
+    // Price bargain validation
+    if (!formData.price_bargain) {
+      newErrors.price_bargain = "Price type is required";
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
   };
 
   // Submit form with API integration
@@ -208,7 +264,10 @@ function ServiceForm({ user_id }: ServiceFormProps) {
     setSubmissionStatus(null);
 
     if (!validateForm()) {
-      // alert("Please fill all fields correctly, select an address, and upload an image.");
+      notificationService.notify({
+        message: "Please fill all required fields correctly",
+        type: "error",
+      });
       return;
     }
 
@@ -231,7 +290,10 @@ function ServiceForm({ user_id }: ServiceFormProps) {
       payload.append("address", formData.address);
       payload.append("latitude", formData.latitude);
       payload.append("longitude", formData.longitude);
-      payload.append("active_status", formData.active_status ? "true" : "false");
+      payload.append(
+        "active_status",
+        formData.active_status ? "true" : "false"
+      );
 
       if (formData.cover_image) {
         payload.append("cover_image", formData.cover_image);
@@ -252,154 +314,167 @@ function ServiceForm({ user_id }: ServiceFormProps) {
 
       if (!response.ok) {
         console.log(data);
-         notificationService.notify({ message: response.statusText, type:  "error" });
+        notificationService.notify({
+          message: data.message || "Failed to create service",
+          type: "error",
+        });
         setSubmissionStatus("error");
       } else {
         console.log("SUCCESS:", data);
+        notificationService.notify({ message: "Service Added Successfully", type: "success" });
         setSubmissionStatus("success");
         setFormData(initialFormState);
-        setAddressQuery("");
+        setSuggestions([]);
+        setShowSuggestions(false);
       }
     } catch (error) {
       console.error("Error submitting:", error);
-      // setSubmissionStatus("error");
-      notificationService.notify({ message: error, type:  "error" });
+      notificationService.notify({ 
+        message: "Network error. Please try again.", 
+        type: "error" 
+      });
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  // UI Classes
-  const getRequiredClass = (field: keyof FormDataType) => {
-    const value = formData[field];
-    const isEmpty =
-      value === undefined || (typeof value === "string" && value.trim() === "");
-    return !isEmpty || isSubmitting
-      ? "border-gray-300 focus:border-indigo-500"
-      : "border-red-400 focus:border-red-500";
-  };
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 flex items-center justify-center p-4">
-      <div className="w-full max-w-2xl bg-white p-8 md:p-10 rounded-2xl shadow-2xl border border-indigo-100">
+    <div className="min-h-screen bg-gray-200 flex items-center justify-center p-4">
+      <div className="w-full bg-white p-8 md:p-10 rounded-2xl shadow-2xl border border-indigo-100">
         <h1 className="text-3xl font-extrabold text-indigo-800 text-center mb-8">
           New Sub-Service Listing
         </h1>
 
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Service Dropdown */}
-          <div>
-            <label className="block mb-1 font-medium text-gray-700">
-              <Package className="inline-block w-4 h-4 mr-1 text-indigo-500" />
-              Parent Service *
-            </label>
-            <select
-              id="service_id"
-              name="service_id"
-              value={formData.service_id}
-              onChange={handleChange}
-              className={`mt-1 block w-full text-black pl-3 pr-10 py-3 rounded-xl shadow-sm border ${getRequiredClass(
-                "service_id"
-              )}`}
-            >
-              <option value="" disabled>
-                Select a service
-              </option>
-              {services.map((s) => (
-                <option key={s.id} value={String(s.id)}>
-                  {s.service_name}
+          <div className="flex gap-4">
+            {/* Parent Service (Select) */}
+            <div className="w-1/2">
+              <label className="block mb-1 font-medium text-gray-700">
+                <Package className="inline-block w-4 h-4 mr-1 text-indigo-500" />
+                Parent Service <span className="text-red-600">*</span>
+              </label>
+              <select
+                id="service_id"
+                name="service_id"
+                value={formData.service_id}
+                onChange={handleChange}
+                className={`mt-1 block w-full text-black pl-3 pr-10 py-3 rounded-xl shadow-sm border ${
+                  errors.service_id ? "border-red-500 focus:border-red-500" : "border-gray-300 focus:border-indigo-500"
+                }`}
+              >
+                <option value="" disabled>
+                  Select a service
                 </option>
-              ))}
-            </select>
-          </div>
+                {services.map((s) => (
+                  <option key={s.id} value={String(s.id)}>
+                    {s.service_name}
+                  </option>
+                ))}
+              </select>
+              {errors.service_id && (
+                <div className="flex items-center gap-1 mt-1">
+                  <AlertCircle className="w-3 h-3 text-red-500" />
+                  <p className="text-xs text-red-500">{errors.service_id}</p>
+                </div>
+              )}
+            </div>
 
-          {/* Sub-Service Name */}
-          <div>
-            <label className="block mb-1 font-medium text-gray-700">
-              <Text className="inline-block w-4 h-4 mr-1 text-indigo-500" />
-              Sub-Service Name *
-            </label>
-            <input
-              type="text"
-              name="sub_service_name"
-              value={formData.sub_service_name}
-              onChange={handleChange}
-              className={`mt-1 block text-black w-full px-4 py-3 rounded-xl shadow-sm border ${getRequiredClass(
-                "sub_service_name"
-              )}`}
-            />
+            {/* Sub Service Name */}
+            <div className="w-1/2">
+              <label className="block mb-1 font-medium text-gray-700">
+                Sub Service Name <span className="text-red-600">*</span>
+              </label>
+              <input
+                type="text"
+                name="sub_service_name"
+                value={formData.sub_service_name}
+                onChange={handleChange}
+                className={`mt-1 block w-full text-black pl-3 pr-3 py-3 rounded-xl shadow-sm border ${
+                  errors.sub_service_name ? "border-red-500 focus:border-red-500" : "border-gray-300 focus:border-indigo-500"
+                }`}
+                placeholder="Enter sub-service name"
+              />
+              {errors.sub_service_name && (
+                <div className="flex items-center gap-1 mt-1">
+                  <AlertCircle className="w-3 h-3 text-red-500" />
+                  <p className="text-xs text-red-500">{errors.sub_service_name}</p>
+                </div>
+              )}
+            </div>
           </div>
 
           {/* Description */}
           <div>
             <label className="block mb-1 font-medium text-gray-700">
               <Text className="inline-block w-4 h-4 mr-1 text-indigo-500" />
-              Description *
+              Description <span className="text-red-600">*</span>
             </label>
             <textarea
               name="description"
               rows={4}
               value={formData.description}
               onChange={handleChange}
-              className={`mt-1 block w-full px-4 py-3 text-black rounded-xl shadow-sm border ${getRequiredClass(
-                "description"
-              )}`}
+              className={`mt-1 block w-full px-4 py-3 text-black rounded-xl shadow-sm border ${
+                errors.description ? "border-red-500 focus:border-red-500" : "border-gray-300 focus:border-indigo-500"
+              }`}
             ></textarea>
+            {errors.description && (
+              <div className="flex items-center gap-1 mt-1">
+                <AlertCircle className="w-3 h-3 text-red-500" />
+                <p className="text-xs text-red-500">{errors.description}</p>
+              </div>
+            )}
           </div>
 
           {/* Address Search with LocationIQ */}
           <div className="relative">
             <label className="block mb-1 font-medium text-gray-700">
               <MapPin className="inline-block w-4 h-4 mr-1 text-indigo-500" />
-              Service Address *
+              Address <span className="text-red-600">*</span>
             </label>
-            <div className="relative">
-              <input
-                type="text"
-                value={addressQuery}
-                onChange={(e) => {
-                  setAddressQuery(e.target.value);
-                  setShowSuggestions(true);
-                }}
-                placeholder="Search for address (e.g., Johar Town, Lahore)"
-                className={`mt-1 block w-full text-black px-4 py-3 pl-10 rounded-xl shadow-sm border ${getRequiredClass(
-                  "address"
-                )}`}
-              />
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-              {isSearching && (
-                <Loader2 className="absolute right-3 top-1/2 transform -translate-y-1/2 text-indigo-500 w-5 h-5 animate-spin" />
-              )}
-            </div>
+            <input
+              type="text"
+              value={formData.address}
+              onChange={searchAddress}
+              placeholder="Search your address..."
+              className={`w-full text-gray-900 px-4 py-3 rounded-xl shadow-sm border focus:outline-none transition ${
+                errors.address
+                  ? "border-red-500 focus:border-red-500"
+                  : "border-gray-300 focus:border-indigo-500"
+              }`}
+            />
 
-            {/* Address Suggestions Dropdown */}
-            {showSuggestions && suggestions.length > 0 && (
-              <div className="absolute z-10 w-full mt-2 bg-white border border-gray-300 rounded-xl shadow-lg max-h-60 overflow-y-auto">
-                {suggestions.map((suggestion) => (
-                  <button
-                    key={suggestion.place_id}
-                    type="button"
-                    onClick={() => handleSelectAddress(suggestion)}
-                    className="w-full text-left px-4 py-3 hover:bg-indigo-50 border-b border-gray-100 last:border-b-0 transition-colors"
-                  >
-                    <div className="flex items-start gap-2">
-                      <MapPin className="w-4 h-4 text-indigo-500 mt-1 flex-shrink-0" />
-                      <span className="text-sm text-gray-800">
-                        {suggestion.display_name}
-                      </span>
+            {/* Suggestions Dropdown */}
+            {showSuggestions && (
+              <div className="absolute left-0 right-0 top-full mt-1 bg-white border border-gray-300 rounded-xl shadow-lg z-50 max-h-60 overflow-y-auto">
+                {isSearching ? (
+                  <div className="p-3 text-center text-gray-500">
+                    <Loader2 className="w-4 h-4 animate-spin inline mr-2" />
+                    Searching...
+                  </div>
+                ) : suggestions.length > 0 ? (
+                  suggestions.map((s, i) => (
+                    <div
+                      key={i}
+                      onClick={() => selectAddress(s)}
+                      className="p-3 hover:bg-gray-100 text-gray-900 w-full cursor-pointer border-b border-gray-100 last:border-b-0"
+                    >
+                      {s.display_name}
                     </div>
-                  </button>
-                ))}
+                  ))
+                ) : (
+                  <div className="p-3 text-center text-gray-500">
+                    No addresses found
+                  </div>
+                )}
               </div>
             )}
 
-            {/* Selected Address Display */}
-            {formData.latitude && formData.longitude && (
-              <div className="mt-2 p-3 bg-green-50 border border-green-200 rounded-lg">
-                <p className="text-xs text-green-700 font-medium flex items-center gap-2">
-                  <CheckCircle className="w-4 h-4" />
-                  Location confirmed: {formData.latitude}, {formData.longitude}
-                </p>
+            {errors.address && (
+              <div className="flex items-center gap-1 mt-1">
+                <AlertCircle className="w-3 h-3 text-red-500" />
+                <p className="text-xs text-red-500">{errors.address}</p>
               </div>
             )}
           </div>
@@ -415,17 +490,23 @@ function ServiceForm({ user_id }: ServiceFormProps) {
                 name="city"
                 value={formData.city}
                 onChange={handleChangeCity}
-                className="mt-1 block w-full px-4 py-3 text-black rounded-xl shadow-sm border border-gray-300"
+                className={`mt-1 block w-full px-4 py-3 text-black rounded-xl shadow-sm border ${
+                  errors.city ? "border-red-500 focus:border-red-500" : "border-gray-300 focus:border-indigo-500"
+                }`}
               >
-                <option value="" disabled>
-                  Select City
-                </option>
+                <option value="" disabled>Select City</option>
                 <option value="Lahore">Lahore</option>
                 <option value="Islamabad">Islamabad</option>
                 <option value="Karachi">Karachi</option>
                 <option value="Multan">Multan</option>
                 <option value="Faisalabad">Faisalabad</option>
               </select>
+              {errors.city && (
+                <div className="flex items-center gap-1 mt-1">
+                  <AlertCircle className="w-3 h-3 text-red-500" />
+                  <p className="text-xs text-red-500">{errors.city}</p>
+                </div>
+              )}
             </div>
 
             <div>
@@ -438,10 +519,16 @@ function ServiceForm({ user_id }: ServiceFormProps) {
                 name="price"
                 value={formData.price}
                 onChange={handleChange}
-                className={`mt-1 block w-full px-4 py-3 text-black rounded-xl shadow-sm border ${getRequiredClass(
-                  "price"
-                )}`}
+                className={`mt-1 block w-full px-4 py-3 text-black rounded-xl shadow-sm border ${
+                  errors.price ? "border-red-500 focus:border-red-500" : "border-gray-300 focus:border-indigo-500"
+                }`}
               />
+              {errors.price && (
+                <div className="flex items-center gap-1 mt-1">
+                  <AlertCircle className="w-3 h-3 text-red-500" />
+                  <p className="text-xs text-red-500">{errors.price}</p>
+                </div>
+              )}
             </div>
           </div>
 
@@ -455,14 +542,20 @@ function ServiceForm({ user_id }: ServiceFormProps) {
               name="price_bargain"
               value={formData.price_bargain}
               onChange={handleChange}
-              className="mt-1 block w-full px-4 py-3 text-black rounded-xl shadow-sm border border-gray-300"
+              className={`mt-1 block w-full px-4 py-3 text-black rounded-xl shadow-sm border ${
+                errors.price_bargain ? "border-red-500 focus:border-red-500" : "border-gray-300 focus:border-indigo-500"
+              }`}
             >
-              <option value="" disabled>
-                Select pricing
-              </option>
+              <option value="" disabled>Select pricing</option>
               <option value="fixed">Fixed</option>
               <option value="negotiable">Negotiable</option>
             </select>
+            {errors.price_bargain && (
+              <div className="flex items-center gap-1 mt-1">
+                <AlertCircle className="w-3 h-3 text-red-500" />
+                <p className="text-xs text-red-500">{errors.price_bargain}</p>
+              </div>
+            )}
           </div>
 
           {/* Cover Image Upload */}
@@ -475,13 +568,21 @@ function ServiceForm({ user_id }: ServiceFormProps) {
               type="file"
               accept="image/*"
               onChange={handleImageUpload}
-              className="mt-1 block w-full text-sm text-black file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100"
+              className={`mt-1 block w-full text-sm text-black file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 ${
+                errors.cover_image ? "border-red-500" : ""
+              }`}
             />
             {formData.cover_image && (
               <p className="text-xs text-green-600 mt-2 flex items-center gap-1">
                 <CheckCircle className="w-3 h-3" />
                 Selected: {formData.cover_image.name}
               </p>
+            )}
+            {errors.cover_image && (
+              <div className="flex items-center gap-1 mt-1">
+                <AlertCircle className="w-3 h-3 text-red-500" />
+                <p className="text-xs text-red-500">{errors.cover_image}</p>
+              </div>
             )}
           </div>
 

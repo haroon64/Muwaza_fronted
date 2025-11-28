@@ -7,7 +7,7 @@ const About: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Hero Section */}
-      <section className="bg-gradient-to-r from-blue-600 to-purple-600 text-white py-20 px-6 text-center">
+      <section className="bg-black text-white py-20 px-6 text-center">
         <h1 className="text-4xl md:text-5xl font-bold mb-4">About Us</h1>
         <p className="max-w-2xl mx-auto text-lg md:text-xl">
           We provide reliable home services to make your life easier. From cleaning
@@ -32,21 +32,21 @@ const About: React.FC = () => {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-10 max-w-5xl mx-auto">
           <div className="flex flex-col items-center text-center p-6 bg-gray-50 rounded-2xl shadow hover:shadow-lg transition">
             <User className="text-blue-600 mb-4" size={48} />
-            <h3 className="text-xl font-semibold mb-2">Plumbing & AC Repair</h3>
+            <h3 className="text-xl text-black font-semibold mb-2">Plumbing & AC Repair</h3>
             <p className="text-gray-600">
               Expert plumbers and AC technicians to keep your home running smoothly.
             </p>
           </div>
           <div className="flex flex-col items-center text-center p-6 bg-gray-50 rounded-2xl shadow hover:shadow-lg transition">
             <MapPin className="text-purple-600 mb-4" size={48} />
-            <h3 className="text-xl font-semibold mb-2">Cleaning Services</h3>
+            <h3 className="text-xl text-black font-semibold mb-2">Cleaning Services</h3>
             <p className="text-gray-600">
               Home and office cleaning done by professionals you can trust.
             </p>
           </div>
           <div className="flex flex-col items-center text-center p-6 bg-gray-50 rounded-2xl shadow hover:shadow-lg transition">
             <Users className="text-green-600 mb-4" size={48} />
-            <h3 className="text-xl font-semibold mb-2">Carpentry & Handyman</h3>
+            <h3 className="text-xl text-black font-semibold mb-2">Carpentry & Handyman</h3>
             <p className="text-gray-600">
               Skilled carpenters and handymen for all your repair and furniture needs.
             </p>
@@ -55,7 +55,7 @@ const About: React.FC = () => {
       </section>
 
       {/* Team Section */}
-      <section className="py-16 px-6 max-w-7xl mx-auto">
+      {/* <section className="py-16 px-6 max-w-7xl mx-auto">
         <h2 className="text-3xl font-bold text-gray-900 mb-10 text-center">Meet Our Team</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
           <div className="flex flex-col items-center text-center">
@@ -67,7 +67,7 @@ const About: React.FC = () => {
                 className="rounded-full object-cover"
               />
             </div>
-            <h3 className="text-xl font-semibold">Ali Khan</h3>
+            <h3 className="text-xl font-semibold">Ammad Fareed</h3>
             <p className="text-gray-600">Founder & CEO</p>
           </div>
           <div className="flex flex-col items-center text-center">
@@ -95,10 +95,10 @@ const About: React.FC = () => {
             <p className="text-gray-600">Lead Technician</p>
           </div>
         </div>
-      </section>
+      </section> */}
 
       {/* Footer CTA */}
-      <section className="bg-gradient-to-r from-blue-600 to-purple-600 text-white py-12 px-6 text-center">
+      {/* <section className="bg-gradient-to-r from-blue-600 to-purple-600 text-white py-12 px-6 text-center">
         <h2 className="text-3xl font-bold mb-4">Need Home Services?</h2>
         <p className="mb-6">Get in touch with us and hire a trusted professional today.</p>
         <a
@@ -107,7 +107,7 @@ const About: React.FC = () => {
         >
           Contact Us
         </a>
-      </section>
+      </section> */}
     </div>
   );
 };

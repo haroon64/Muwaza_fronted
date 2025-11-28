@@ -6,6 +6,7 @@ interface UserType {
   id?: number;
   name?: string;
   email?: string;
+  role?:string;
   // add more fields if needed
 }
 
@@ -13,12 +14,15 @@ interface AuthContextType {
   user: UserType | null;
   setUser: (user: UserType | null) => void;
   isLoggedIn: boolean;
+  
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<UserType | null>(null);
+
+  
 
   return (
     <AuthContext.Provider value={{ user, setUser, isLoggedIn: !!user }}>
