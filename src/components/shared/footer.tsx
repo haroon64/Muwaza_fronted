@@ -25,21 +25,41 @@ import {
 export default function Footer() {
   const theme = useTheme();
   const currentYear = new Date().getFullYear();
-  const socialLinks = [
-  { icon: Facebook, url: "https://facebook.com" },
-  { icon: Twitter, url: "https://twitter.com" },
-  { icon: Instagram, url: "https://instagram.com" },
-  { icon: LinkedIn, url: "https://linkedin.com" },
-];
-
-
   
+  const socialLinks = [
+    { icon: Facebook, url: "https://facebook.com" },
+    { icon: Twitter, url: "https://twitter.com" },
+    { icon: Instagram, url: "https://instagram.com" },
+    { icon: LinkedIn, url: "https://linkedin.com" },
+  ];
+
+  // Contact information
+  const contactInfo = {
+    address: "1st Floor, opposite McDonald's, Block A Central Park Housing Scheme, Lahore, Pakistan",
+    phone: "+92 (555) 123-4567",
+    email: "support@servicehub.com",
+    companyName: "Muawza"
+  };
+
+  // Navigation handlers
+  const handleLocationClick = () => {
+    const encodedAddress = encodeURIComponent(contactInfo.address);
+    window.open(`https://www.google.com/maps/search/?api=1&query=${encodedAddress}`, '_blank');
+  };
+
+  const handleEmailClick = () => {
+    window.open(`https://mail.google.com/mail/?view=cm&fs=1&to=${contactInfo.email}`, '_blank');
+  };
+
+  const handlePhoneClick = () => {
+    window.open(`tel:${contactInfo.phone}`, '_self');
+  };
 
   return (
     <Box
       component="footer"
       sx={{
-        background: " #3730a3",
+        background: "#3730a3",
         color: "white",
         py: 8,
         mt: "auto",
@@ -67,7 +87,7 @@ export default function Footer() {
                   color: "transparent",
                 }}
               >
-               Muawza
+                {contactInfo.companyName}
               </Typography>
               <Typography variant="body1" sx={{ mb: 3, color: "grey.300" }}>
                 Connecting professionals with customers seamlessly. Find the best services near you or grow your business with our platform.
@@ -75,53 +95,88 @@ export default function Footer() {
               
               {/* Contact Info */}
               <Stack spacing={1} sx={{ mb: 3 }}>
-                <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                {/* Location with click handler */}
+                <Box 
+                  sx={{ 
+                    display: "flex", 
+                    alignItems: "center", 
+                    gap: 1,
+                    cursor: "pointer",
+                    "&:hover": { color: "primary.light" },
+                    transition: "color 0.3s ease",
+                  }}
+                  onClick={handleLocationClick}
+                >
                   <LocationOn sx={{ color: "primary.light", fontSize: 20 }} />
-                  <Typography variant="body2" sx={{ color: "grey.300" }}>
-                    123 Business Street, City, State 12345
+                  <Typography variant="body2" sx={{ color: "inherit" }}>
+                    {contactInfo.address}
                   </Typography>
                 </Box>
-                <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+
+                {/* Phone with click handler */}
+                <Box 
+                  sx={{ 
+                    display: "flex", 
+                    alignItems: "center", 
+                    gap: 1,
+                    cursor: "pointer",
+                    "&:hover": { color: "primary.light" },
+                    transition: "color 0.3s ease",
+                  }}
+                  onClick={handlePhoneClick}
+                >
                   <Phone sx={{ color: "primary.light", fontSize: 20 }} />
-                  <Typography variant="body2" sx={{ color: "grey.300" }}>
-                    +1 (555) 123-4567
+                  <Typography variant="body2" sx={{ color: "inherit" }}>
+                    {contactInfo.phone}
                   </Typography>
                 </Box>
-                <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+
+                {/* Email with click handler */}
+                <Box 
+                  sx={{ 
+                    display: "flex", 
+                    alignItems: "center", 
+                    gap: 1,
+                    cursor: "pointer",
+                    "&:hover": { color: "primary.light" },
+                    transition: "color 0.3s ease",
+                  }}
+                  onClick={handleEmailClick}
+                >
                   <Email sx={{ color: "primary.light", fontSize: 20 }} />
-                  <Typography variant="body2" sx={{ color: "grey.300" }}>
-                    support@servicehub.com
+                  <Typography variant="body2" sx={{ color: "inherit" }}>
+                    {contactInfo.email}
                   </Typography>
                 </Box>
               </Stack>
 
               {/* Social Media */}
-             <Box sx={{ display: "flex", gap: 1 }}>
-            {socialLinks.map(({ icon: Icon, url }, index) => (
-              <motion.div
-                key={index}
-                whileHover={{ scale: 1.1, y: -2 }}
-                whileTap={{ scale: 0.95 }}
-              >
-                <IconButton
-                  component="a"
-                  href={url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  sx={{
-                    color: "grey.300",
-                    backgroundColor: "rgba(255,255,255,0.1)",
-                    "&:hover": {
-                      backgroundColor: "primary.main",
-                      color: "white",
-                    },
-                  }}
-                >
-                  <Icon />
-                </IconButton>
-              </motion.div>
-            ))}
-          </Box>
+              <Box sx={{ display: "flex", gap: 1 }}>
+                {socialLinks.map(({ icon: Icon, url }, index) => (
+                  <motion.div
+                    key={index}
+                    whileHover={{ scale: 1.1, y: -2 }}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    <IconButton
+                      component="a"
+                      href={url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      sx={{
+                        color: "grey.300",
+                        backgroundColor: "rgba(255,255,255,0.1)",
+                        "&:hover": {
+                          backgroundColor: "primary.main",
+                          color: "white",
+                        },
+                      }}
+                    >
+                      <Icon />
+                    </IconButton>
+                  </motion.div>
+                ))}
+              </Box>
             </motion.div>
           </Grid>
 
@@ -136,7 +191,7 @@ export default function Footer() {
                 Quick Links
               </Typography>
               <Stack spacing={1}>
-                {["Home", "Services", "About", ].map((item) => (
+                {["Home", "Services", "About"].map((item) => (
                   <Link
                     key={item}
                     href={item === "Home" ? "/" : `/${item.toLowerCase()}`}
@@ -161,97 +216,14 @@ export default function Footer() {
             </motion.div>
           </Grid>
 
-          {/* Services */}
-          {/* <Grid item xs={12} sm={6} md={2}>
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.2 }}
-            >
-              <Typography variant="h6" sx={{ mb: 3, fontWeight: "bold" }}>
-                Services
-              </Typography>
-              <Stack spacing={1}>
-                {["Cleaning", "Repair", "Beauty", "Fitness", "Tutoring"].map((service) => (
-                  <Typography
-                    key={service}
-                    sx={{
-                      color: "grey.300",
-                      "&:hover": {
-                        color: "primary.light",
-                        transform: "translateX(4px)",
-                      },
-                      transition: "all 0.3s ease",
-                      cursor: "pointer",
-                    }}
-                  >
-                    {service}
-                  </Typography>
-                ))}
-              </Stack>
-            </motion.div>
-          </Grid> */}
-
-          {/* CTA Section */}
+          {/* CTA Section - Optional */}
           <Grid item xs={12} md={4}>
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.3 }}
             >
-              {/* <Box
-                sx={{
-                  background: "linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%)",
-                  p: 4,
-                  borderRadius: 4,
-                  border: "1px solid rgba(255,255,255,0.1)",
-                }}
-              >
-                <Typography variant="h5" sx={{ mb: 2, fontWeight: "bold" }}>
-                  Ready to Get Started?
-                </Typography>
-                <Typography variant="body2" sx={{ mb: 3, color: "grey.300" }}>
-                  Join our growing community of professionals and customers today.
-                </Typography>
-                <Stack direction={{ xs: "column", sm: "row" }} spacing={2}>
-                  <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                    <Button
-                      component={Link}
-                      href="/auth/signup?role=customer"
-                      variant="contained"
-                      fullWidth
-                      sx={{
-                        background: "linear-gradient(45deg, #4f46e5, #7c3aed)",
-                        color: "white",
-                        fontWeight: "bold",
-                        py: 1.5,
-                      }}
-                    >
-                      Find Services
-                    </Button>
-                  </motion.div>
-                  <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                    <Button
-                      component={Link}
-                      href="/auth/signup?role=vendor"
-                      variant="outlined"
-                      fullWidth
-                      sx={{
-                        borderColor: "grey.300",
-                        color: "grey.300",
-                        fontWeight: "bold",
-                        py: 1.5,
-                        "&:hover": {
-                          borderColor: "primary.light",
-                          color: "primary.light",
-                        },
-                      }}
-                    >
-                      Become Vendor
-                    </Button>
-                  </motion.div>
-                </Stack>
-              </Box> */}
+              {/* Add your CTA content here if needed */}
             </motion.div>
           </Grid>
         </Grid>
@@ -269,25 +241,29 @@ export default function Footer() {
           }}
         >
           <Typography variant="body2" sx={{ color: "grey.400" }}>
-            © {currentYear} ServiceHub. All rights reserved.
+            © {currentYear} {contactInfo.companyName}. All rights reserved.
           </Typography>
           <Box sx={{ display: "flex", gap: 3 }}>
-            {["privacy-policy", "Term-and-Conditions", "cookie-policy"].map((item) => (
+            {[
+              { label: "Privacy Policy", path: "privacy-policy" },
+              { label: "Terms & Conditions", path: "Term-and-Conditions" },
+              { label: "Cookie Policy", path: "cookie-policy" }
+            ].map((item) => (
               <Link
-              key={item}
-              href={`/${item}`}
-              style={{ textDecoration: "none" }}
+                key={item.path}
+                href={`/${item.path}`}
+                style={{ textDecoration: "none" }}
               >
-              <Typography
-                variant="body2"
-                sx={{
-                color: "grey.400",
-                "&:hover": { color: "primary.light" },
-                transition: "color 0.3s ease",
-                }}
-              >
-                {item}
-              </Typography>
+                <Typography
+                  variant="body2"
+                  sx={{
+                    color: "grey.400",
+                    "&:hover": { color: "primary.light" },
+                    transition: "color 0.3s ease",
+                  }}
+                >
+                  {item.label}
+                </Typography>
               </Link>
             ))}
           </Box>

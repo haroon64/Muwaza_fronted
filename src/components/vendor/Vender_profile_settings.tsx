@@ -632,7 +632,8 @@ const VendorProfileSettings = () => {
       } else {
         console.log("PROFILE CREATED:");
         setCreated(true)
-        setIsEditing(true);
+        setIsEditing(false);
+        setCreatingProfile(true);
       }
     } catch (error) {
       console.error("Create profile error:", error);
@@ -706,7 +707,7 @@ const VendorProfileSettings = () => {
           ) : (
             <button
               onClick={(e) => {
-                if (isEditing && creatingProfile) {
+                if (isEditing ) {
                   handleEdit(e);
                 } else {
                   setIsEditing(true);
@@ -715,7 +716,7 @@ const VendorProfileSettings = () => {
               className="bg-white text-blue-600 px-6 py-3 rounded-full font-semibold hover:shadow-2xl transition-all hover:scale-105 flex items-center gap-2"
             >
               <Edit2 className="w-4 h-4" />
-              {isEditing && creatingProfile ? "Save Changes" : "Edit Profile"}
+              {isEditing  ? "Save Changes" : "Edit Profile"}
             </button>
           )}
         </div>

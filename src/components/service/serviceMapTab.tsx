@@ -119,6 +119,11 @@ const MapView: React.FC<MapViewProps> = ({
       setLoading(false);
     }
   }, [city, selectedService, searchName, priceMin, priceMax]);
+  useEffect(() => {
+    window.selectService = (id) => {
+      window.location.href = `/services/${id}`;
+    };
+  }, []);
 
   const focusOnServiceLocation = (service: SubService) => {
     if (
@@ -258,34 +263,40 @@ const MapView: React.FC<MapViewProps> = ({
         });
 
         const marker = L.marker([lat, lng], { icon: serviceIcon }).addTo(map)
-          .bindPopup(`
-                        <div class="w-64 p-3">
-                            <h3 class="font-bold text-gray-900 mb-2">${
-                              service.sub_service_name
-                            }</h3>
-                            <p class="text-sm text-gray-600 mb-2">${
-                              service.service_name
-                            }</p>
-                            <p class="text-sm text-gray-700 mb-3">${
-                              service.address.address || "Address not available"
-                            }</p>
-                            <div class="flex justify-between items-center">
-                                <span class="text-green-600 font-bold">${
-                                  service.price_bargain
-                                }</span>
-                                <button onclick="window.selectService(${
-                                  service.id
-                                })" 
-                                    class="bg-blue-500 text-white px-3 py-1 rounded-lg text-sm hover:bg-blue-600 transition-colors">
-                                    View Details
-                                </button>
-                            </div>
-                        </div>
-                    `);
+           .bindPopup(`
+                    <div class="w-64 p-3">
+                    <h3 class="font-bold text-gray-900 mb-2">${service.sub_service_name}</h3>
+                    <p class="text-sm text-gray-600 mb-2">${service.service_name}</p>
+                    <p class="text-sm text-gray-700 mb-3">${service.address.address || "Address not available"}</p>
+                    <div class="flex justify-between items-center">
+                        <span class="text-green-600 font-bold">${service.price_bargain}</span>
+                        <button 
+                        id="popup-btn-${service.id}"
+                        class="bg-blue-500 cursor-pointer  text-white px-3 py-1 rounded-lg text-sm hover:bg-blue-600 transition-colors">
+                        View Details
+                        </button>
+                    </div>
+                    </div>
+                `);
 
-        marker.on("click", () => {
-          setSelectedServiceItem(service);
-        });
+                    marker.on("popupopen", (e) => {
+                    // Get the popup DOM element safely
+                    const popupEl = e.popup.getElement();
+
+                    // Query the button INSIDE the popup
+                    const btn = popupEl.querySelector(`#popup-btn-${service.id}`);
+
+                    console.log("BTN FOUND?", btn);
+
+                    if (btn) {
+                        btn.addEventListener("click", () => {
+                        setSelectedServiceItem(service);
+                        window.location.href = `/services/${service.id}`;
+                        });
+                    }
+                    });
+
+
       }
     });
 
@@ -313,8 +324,6 @@ const MapView: React.FC<MapViewProps> = ({
       currency: "PKR",
     }).format(price);
   };
-
-  
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
