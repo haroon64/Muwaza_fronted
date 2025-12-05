@@ -99,13 +99,13 @@ const CustomerProfileSettings = () => {
   useEffect(() => {
     if (user?.user?.id) {
       setUserId(user?.user?.id);
-      console.log("user=====>", user.user.full_name);
       setFullName(user.user.full_name);
     }
   }, [user?.user?.id]);
 
   useEffect(() => {
-    if (!user?.user?.id) return;
+     
+    if (!userId) return;
 
     const checkProfile = async () => {
       console.log("load it out");
@@ -144,7 +144,7 @@ const CustomerProfileSettings = () => {
           // Clear any selected File object since we only have a URL
           setProfileImage(null);
         }
-
+        console.log("===>",data.exists)
         setCreatingProfile(data.exists);
         setLoadingProfile(false);
 
